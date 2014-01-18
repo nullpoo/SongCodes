@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SongCodes</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Mainアクティビティ -->
+    <string name="main_search_edit_hint">検索ワードを入力</string>
+    <string name="main_search_submit">検索</string>
+    <string name="main_search_type_and">AND</string>
+    <string name="main_search_type_or">OR</string>
+
+    <!-- Searchアクティビティ -->
+    <string name="title_activity_search">Search</string>
+
+</resources>

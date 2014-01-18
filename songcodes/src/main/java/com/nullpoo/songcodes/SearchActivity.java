@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +17,12 @@ import android.os.Build;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
@@ -28,24 +35,31 @@ public class SearchActivity extends Activity {
     /** 検索結果表示用のリストビュー */
     private ListView mListView;
 
-    /** データストア */
-    private ISearchDataStore mDataStore;
+    /** 検索結果一覧 */
+    private ArrayList<SongInfo> mSongInfos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        mDataStore = new SearchDataStore();
         String[] keywords = new String[] {"hoge"};
-        ArrayList<SongInfo> songInfos = mDataStore.getSearchResult(keywords, ISearchDataStore.SearchType.AND);
-        SongInfo item = new SongInfo();
-        item.title = "hoge";
-        item.credit = "fuga";
-        songInfos.add(item);
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(new StringRequest(Request.Method.GET, "http://music.j-total.net/", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Log.d("SongCodes", s);
+                SongInfo item = new SongInfo();
+                item.title = s;
+                item.credit = s;
+                mSongInfos.add(item);
+                ((SearchInfoArrayAdapter) mListView.getAdapter()).notifyDataSetChanged();
+            }
+        }, null));
 
         mListView = (ListView)findViewById(R.id.search_list);
-        SearchInfoArrayAdapter adapter = new SearchInfoArrayAdapter(this, R.layout.activity_search_list_item, songInfos);
+        mSongInfos = new ArrayList<SongInfo>();
+        SearchInfoArrayAdapter adapter = new SearchInfoArrayAdapter(this, R.layout.activity_search_list_item, mSongInfos);
         mListView.setAdapter(adapter);
     }
 

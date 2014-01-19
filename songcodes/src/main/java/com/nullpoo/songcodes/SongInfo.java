@@ -6,4 +6,5 @@ package com.nullpoo.songcodes;
 public class SongInfo {
     public String title;
     public String credit;
+    public String url;
 }

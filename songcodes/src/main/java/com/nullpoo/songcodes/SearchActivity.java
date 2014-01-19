@@ -24,7 +24,9 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,10 +50,16 @@ public class SearchActivity extends Activity {
         queue.add(new StringRequest(Request.Method.GET, "http://music.j-total.net/", new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                Log.d("SongCodes", s);
+                String str = "";
+                try {
+                    str = new String(s.getBytes("Shift_JIS"), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                Log.d("SongCodes", str);
                 SongInfo item = new SongInfo();
-                item.title = s;
-                item.credit = s;
+                item.title = str;
+                item.credit = str;
                 mSongInfos.add(item);
                 ((SearchInfoArrayAdapter) mListView.getAdapter()).notifyDataSetChanged();
             }

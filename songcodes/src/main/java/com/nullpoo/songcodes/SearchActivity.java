@@ -5,6 +5,7 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Layout;
 import android.util.Log;
@@ -26,13 +27,18 @@ import com.android.volley.toolbox.Volley;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SearchActivity extends Activity {
 
-    public static final String INTENT_PARAM_SEARCH = "IntentParamSearch";
+    public static final String INTENT_PARAM_KEYWORD = "IntentParamSearch";
+
+    private static final String JTOTAL_URL = "http://music.j-total.net/";
 
     /** 検索結果表示用のリストビュー */
     private ListView mListView;
@@ -45,14 +51,24 @@ public class SearchActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        String[] keywords = new String[] {"hoge"};
+        //検索キーワードを取得
+        String keyword = getIntent().getStringExtra(INTENT_PARAM_KEYWORD);
+        //キーワードをURLエンコード
+        try {
+            keyword = URLEncoder.encode(keyword, "Shift-JIS");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        //リクエストURLを生成
+        String requestUrl = JTOTAL_URL+"db/search.cgi?mode=search&word="+keyword;
+
         RequestQueue queue = Volley.newRequestQueue(this);
-        queue.add(new StringRequest(Request.Method.GET, "http://music.j-total.net/", new Response.Listener<String>() {
+        queue.add(new StringRequest(Request.Method.GET, requestUrl, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 String str = "";
                 try {
-                    str = new String(s.getBytes("Shift_JIS"), "UTF-8");
+                    str = new String(s.getBytes("Shift_JIS"), "Shift_JIS");
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }

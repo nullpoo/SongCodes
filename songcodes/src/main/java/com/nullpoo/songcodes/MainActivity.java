@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
-                intent.putExtra(SearchActivity.INTENT_PARAM_SEARCH, searchEditText.getText().toString());
+                intent.putExtra(SearchActivity.INTENT_PARAM_KEYWORD, searchEditText.getText().toString());
                 startActivity(intent);
             }
         });

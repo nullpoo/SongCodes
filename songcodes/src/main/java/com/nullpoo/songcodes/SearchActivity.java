@@ -1,44 +1,30 @@
 package com.nullpoo.songcodes;
 
 import android.app.Activity;
-import android.app.ActionBar;
-import android.app.Fragment;
+import android.app.LoaderManager;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
+import android.content.Loader;
 import android.os.Bundle;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
 import java.io.UnsupportedEncodingException;
-import java.lang.ref.SoftReference;
-import java.net.URI;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+
+import android.app.LoaderManager.LoaderCallbacks;
 
 public class SearchActivity extends Activity {
 
     public static final String INTENT_PARAM_KEYWORD = "IntentParamSearch";
-
-    private static final String JTOTAL_URL = "http://music.j-total.net/";
 
     /** 検索結果表示用のリストビュー */
     private ListView mListView;
@@ -46,45 +32,31 @@ public class SearchActivity extends Activity {
     /** 検索結果一覧 */
     private ArrayList<SongInfo> mSongInfos;
 
+    /** 検索キーワード */
+    private String mKeyword;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
         //検索キーワードを取得
-        String keyword = getIntent().getStringExtra(INTENT_PARAM_KEYWORD);
+        mKeyword = getIntent().getStringExtra(INTENT_PARAM_KEYWORD);
         //キーワードをURLエンコード
         try {
-            keyword = URLEncoder.encode(keyword, "Shift-JIS");
+            mKeyword = URLEncoder.encode(mKeyword, "Shift_JIS");
+            Log.d("SongCodes", mKeyword);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        //リクエストURLを生成
-        String requestUrl = JTOTAL_URL+"db/search.cgi?mode=search&word="+keyword;
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        queue.add(new StringRequest(Request.Method.GET, requestUrl, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                String str = "";
-                try {
-                    str = new String(s.getBytes("Shift_JIS"), "Shift_JIS");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                Log.d("SongCodes", str);
-                SongInfo item = new SongInfo();
-                item.title = str;
-                item.credit = str;
-                mSongInfos.add(item);
-                ((SearchInfoArrayAdapter) mListView.getAdapter()).notifyDataSetChanged();
-            }
-        }, null));
 
         mListView = (ListView)findViewById(R.id.search_list);
+        //アダプタの設定
         mSongInfos = new ArrayList<SongInfo>();
         SearchInfoArrayAdapter adapter = new SearchInfoArrayAdapter(this, R.layout.activity_search_list_item, mSongInfos);
         mListView.setAdapter(adapter);
+
+        getLoaderManager().initLoader(0, null, mSearchCallbacks);
     }
 
 
@@ -107,6 +79,27 @@ public class SearchActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    /** 検索結果を返すローダー */
+    private LoaderCallbacks mSearchCallbacks = new LoaderCallbacks<List<SongInfo>>() {
+        @Override
+        public Loader<List<SongInfo>> onCreateLoader(int id, Bundle args) {
+            SearchSongListLoader listLoader = new SearchSongListLoader(getApplicationContext(), mKeyword);
+            listLoader.forceLoad(); //開始
+            return listLoader;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<SongInfo>> loader, List<SongInfo> data) {
+            mSongInfos.addAll(data);
+            ((SearchInfoArrayAdapter) mListView.getAdapter()).notifyDataSetChanged();
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<SongInfo>> loader) {
+
+        }
+    };
 
     /**
      * 検索結果リスト表示のアダプター
@@ -165,5 +158,4 @@ public class SearchActivity extends Activity {
             view.setTag(this);
         }
     }
-
 }

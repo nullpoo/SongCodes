@@ -19,5 +19,7 @@ android {
 }
 
 dependencies {
-    compile files('libs/volley.jar')
+    compile files('libs/jsoup-1.7.3.jar')
+    compile files('libs/jsoup-1.7.3-javadoc.jar')
+    compile files('libs/jsoup-1.7.3-source.jar')
 }
